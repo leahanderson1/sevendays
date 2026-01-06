@@ -6,10 +6,7 @@
 #include <math.h>
 #include <gccore.h>
 #include <wiiuse/wpad.h>
-
-#include "seal_tpl.h"
-#include "seal.h"
-#include "seal_txt.h"
+#include "things.h"
 #include "mud_tpl.h"
 #include "mud.h"
 #include "world_txt.h"
@@ -18,7 +15,8 @@
 #include "door_tpl.h"
 #include "door.h"
 #include "doortext_tpl.h"
-
+#include "locked_tpl.h"
+#include "entrance.h"
 #define DEFAULT_FIFO_SIZE	(256*1024)
 #define ROOM_X 1.8f
 #define ROOM_Z 1.8f
@@ -34,7 +32,7 @@ static void *frameBuffer[2] = { NULL, NULL};
 GXRModeObj *rmode;
 
 f32 xrot;   // x rotation
-f32 yrot;   // y rotation
+f32 yrot;
 f32 xspeed; // x rotation speed
 f32 yspeed; // y rotation speed
 
@@ -42,10 +40,9 @@ f32 walkbias = 0;
 f32 walkbiasangle = 0;
 
 f32 lookupdown = 0.0f;
-f32 objectYRot = 0.0f;
 int interactTimer = 0;
-float xpos, zpos;
-
+f32 xpos, zpos;
+Mtx view;
 f32 zdepth=0.0f; // depth into the screen
 
 static GXColor LightColors[] = {
@@ -55,34 +52,9 @@ static GXColor LightColors[] = {
 };
 
 // A vertex is the basic element of our room.
-typedef struct tagVERTEX // vertex coords - 3d and texture
-{
-	float x, y, z; // 3d coords
-	float u, v;    // tex coords
-	float nx, ny, nz; // normals
-} VERTEX;
 
-// Triangle is a set of three vertices.
-typedef struct tagTRIANGLE // triangle
-{
-	VERTEX vertex[3]; // 3 vertices
-} TRIANGLE;
-
-// Sector represents a room, i.e. series of tris.
-typedef struct tagSECTOR
-{
-	int numtriangles;   // Number of tris in this sector
-	TRIANGLE* triangle; // Ptr to array of tris
-} SECTOR;
-
-typedef enum {
-	NONE,
-	NOTURNINGBACK,
-	SEVENDAYS
-} TEXT;
 
 SECTOR sector1;
-SECTOR sealObj;
 GXTexObj texture;
 TPLFile mudTPL;
 TPLFile sealTPL;
@@ -95,18 +67,22 @@ TPLFile doorTPL;
 GXTexObj doorTexture;
 TPLFile noTPL;
 GXTexObj noTexture;
+TPLFile lockedTPL;
+GXTexObj lockedTexture;
+int (*level_render)();
+int (*level_init)();
+int (*level_collide)();
+int (*level_interact)();
+int (*level_free)();
 
 void DrawScene(Mtx v, GXTexObj texture);
 void Draw2D();
 void End2D(Mtx44);
 void SetLight(Mtx view, GXColor litcol, GXColor ambcol, GXColor matcol, f32 playerX, f32 playerZ);
 int SetupWorld(void);
-int SetupThing(const unsigned char* mdata, size_t msize, SECTOR* output);
-void DrawSpinnyBoi(Mtx v, GXTexObj texture, SECTOR* object, f32 posX, f32 posY, f32 posZ);
-void readstr(FILE *f, char *string);
-void initnetwork(void);
 void textDraw(GXTexObj);
 bool CheckObjectCollision(f32 x, f32 z, f32, f32 x2, f32 z2);
+TEXT interaction;
 
 
 //---------------------------------------------------------------------------------
@@ -115,16 +91,19 @@ int main( int argc, char **argv ){
 	f32 yscale;
 
 	u32 xfbHeight;
-	TEXT interaction = NONE;
+	interaction = NONE;
 	// various matrices for things like view
-	Mtx	view,mv,mr;
+	Mtx mv,mr;
 	Mtx44 perspective;
-
-	// the texure we're going to paint
+	level_render = &entrance;
+	level_init = &entrance_load;
+	level_collide = &entrance_collision;
+	level_interact = &entrance_interact;
+	level_free = &entrance_free;
 
 	u32	fb = 0; 	// initial framebuffer index
 	GXColor background = {0, 0, 0, 0xff};
-
+	// various init stuff
 	VIDEO_Init();
 	PAD_Init();
 	WPAD_Init();
@@ -148,7 +127,7 @@ int main( int argc, char **argv ){
 	gp_fifo = memalign(32,DEFAULT_FIFO_SIZE);
 	memset(gp_fifo,0,DEFAULT_FIFO_SIZE);
 
-	// ...then init the flipper
+	// ...then init the GPU
 	GX_Init(gp_fifo,DEFAULT_FIFO_SIZE);
 
 	// clears the bg to color and clears the z buffer
@@ -163,7 +142,6 @@ int main( int argc, char **argv ){
 	GX_SetDispCopyDst(rmode->fbWidth,xfbHeight);
 	GX_SetCopyFilter(rmode->aa,rmode->sample_pattern,GX_TRUE,rmode->vfilter);
 	GX_SetFieldMode(rmode->field_rendering,((rmode->viHeight==2*rmode->xfbHeight)?GX_ENABLE:GX_DISABLE));
-
 	if (rmode->aa)
 		GX_SetPixelFmt(GX_PF_RGB565_Z16, GX_ZC_LINEAR);
 	else
@@ -179,12 +157,12 @@ int main( int argc, char **argv ){
 	// so for ex. in the first call we are sending position data with
 	// 3 values X,Y,Z of size F32. scale sets the number of fractional
 	// bits for non float data.
-	GX_InvVtxCache();
+	GX_InvVtxCache(); // by Inv it means invalidate
 	GX_ClearVtxDesc();
 	GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
 	GX_SetVtxDesc(GX_VA_NRM, GX_DIRECT);
 	GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
-
+	// selects the data types for each input
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_NRM, GX_NRM_XYZ, GX_F32, 0);
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
@@ -202,23 +180,28 @@ int main( int argc, char **argv ){
 	GX_InvalidateTexAll();
 	TPL_OpenTPLFromMemory(&mudTPL, (void *)mud_tpl,mud_tpl_size);
 	TPL_GetTexture(&mudTPL,mud,&texture);
-	TPL_OpenTPLFromMemory(&sealTPL, (void *)seal_tpl,seal_tpl_size);
-	TPL_GetTexture(&sealTPL,seal,&sealTexture);
+	TPL_CloseTPLFile(&mudTPL);
 	TPL_OpenTPLFromMemory(&sevenTPL, (void *)sevendays_tpl, sevendays_tpl_size);
 	TPL_GetTexture(&sevenTPL,0,&sevenTexture);
+	TPL_CloseTPLFile(&sevenTPL);
 	TPL_OpenTPLFromMemory(&lighterTPL, (void *)lighter_tpl, lighter_tpl_size);
 	TPL_GetTexture(&lighterTPL,0,&lighterTexture);
+	TPL_CloseTPLFile(&lighterTPL);
 	TPL_OpenTPLFromMemory(&doorTPL, (void *)door_tpl, door_tpl_size);
 	TPL_GetTexture(&doorTPL,door,&doorTexture);
+	TPL_CloseTPLFile(&doorTPL);
 	TPL_OpenTPLFromMemory(&noTPL,(void *)doortext_tpl, doortext_tpl_size);
 	TPL_GetTexture(&noTPL,0,&noTexture);
+	TPL_CloseTPLFile(&noTPL);
+	TPL_OpenTPLFromMemory(&lockedTPL, (void *)locked_tpl, locked_tpl_size);
+	TPL_GetTexture(&lockedTPL, 0, &lockedTexture);
+	TPL_CloseTPLFile(&lockedTPL);
 	// setup our camera at the origin
 	// looking down the -z axis with y up
 	guVector cam = {0.0F, 0.0F, 0.0F},
 			up = {0.0F, 1.0F, 0.0F},
 		  look = {0.0F, 0.0F, -1.0F};
 	guLookAt(view, &cam, &up, &look);
-
 
 	// setup our projection matrix
 	// this creates a perspective matrix with a view angle of 90,
@@ -228,22 +211,17 @@ int main( int argc, char **argv ){
 
 	// get the initial room ready to render
 	SetupWorld();
-	SetupThing(seal_txt, seal_txt_size, &sealObj);
+	(*level_init)();
 	while(1) {
 		PAD_ScanPads();
 		WPAD_ScanPads();
+		int pad = PAD_ButtonsDown(0);
 		if (WPAD_ButtonsDown(0) & WPAD_BUTTON_HOME) exit(0);
-		if(PAD_ButtonsDown(0) & PAD_BUTTON_START) exit(0);
-		objectYRot += 0.5f; 
-   		if(objectYRot >= 360.0f) objectYRot -= 360.0f;
-		if(PAD_ButtonsDown(0) & PAD_BUTTON_A) {
-			if (CheckObjectCollision(xpos, zpos, 0.0f, -1.0f, 0.5f)) {
-				interaction = SEVENDAYS;
-				interactTimer = 60;
-			} else if (CheckObjectCollision(xpos, zpos, 0.0f, 1.8f, 0.2f)) {
-				interaction = NOTURNINGBACK;
-				interactTimer = 60;
-			}
+		if(pad & PAD_BUTTON_START) exit(0);
+
+		if(pad & PAD_BUTTON_A) {
+			// as well as set the interact timer, the interact function also sets what kind of interaction to use
+			interactTimer = (*level_interact)();
 		}
 		s8 tpad;
 		tpad = PAD_SubStickX(0);
@@ -299,18 +277,7 @@ int main( int argc, char **argv ){
 			}
 			walkbias = (float)sin(DegToRad(walkbiasangle))/20.0f;
 		}
-
-		if(CheckObjectCollision(xpos, zpos, 0.0f, -1.0f, 0.2f)) {
-			f32 pushBack = 0.05f;
-			f32 dx = 0.0f - xpos;
-			f32 dz = -1.0f - zpos;
-			f32 dist = sqrtf(dx*dx + dz*dz);
-			if(dist > 0) {
-				xpos -= (dx/dist) * pushBack;
-				zpos -= (dz/dist) * pushBack;
-			}
-		}
-
+		(*level_collide)();
 
 		// do this before drawing
 		GX_SetViewport(0,0,rmode->fbWidth,rmode->efbHeight,0,1);
@@ -318,20 +285,24 @@ int main( int argc, char **argv ){
 
 		// Draw things
 		DrawScene(view,texture);
-		DrawSpinnyBoi(view, sealTexture, &sealObj, 0.0f, 0.1f, -1.0f);
+		(*level_render)();
 		Draw2D();
+		// 2D drawing
 		if (interactTimer > 0) {
 			switch (interaction) {
 				default:
 					break; //unimplemented
 				case NONE:
-					interactTimer = 1; // looks like SOMEONE forgot to clear the interaction timer
+					interactTimer = 1; // looks like SOMEONE forgot to clear the interaction timer so i'll just fix it for ya buddy
 					break;
 				case SEVENDAYS:
 					textDraw(sevenTexture);
 					break;
 				case NOTURNINGBACK:
 					textDraw(noTexture);
+					break;
+				case LOCKED:
+					textDraw(lockedTexture);
 					break;
 			}
 			interactTimer--;
@@ -340,6 +311,7 @@ int main( int argc, char **argv ){
 			interaction = NONE;
 		GX_LoadTexObj(&lighterTexture, GX_TEXMAP0);
 		GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+		// draw lighter
 		GX_Position2s16(300, 250);
 		GX_TexCoord2f32(0.0f, 0.0f);
 
@@ -462,6 +434,7 @@ void DrawScene(Mtx v, GXTexObj texture) {
 			GX_End();
 	}
 	GX_LoadTexObj(&doorTexture, GX_TEXMAP0);
+	// draw doors in every doorway
 	GX_Begin(GX_QUADS, GX_VTXFMT0,4);
 	GX_Position3f32(-0.5f, 0.0f, 3.0f);
 	GX_Normal3f32(-0.5f, 0.0f, 3.0f);
@@ -542,7 +515,7 @@ void SetLight(Mtx view, GXColor litcol, GXColor ambcol, GXColor matcol, f32 play
 	GX_SetChanMatColor(GX_COLOR0A0, matcol);
 }
 
-// Read in and parse world info.
+// sets up the initial generic 4-exit room. You can remove an exit by just drawing a quad over an entrance.
 
 int SetupWorld(void) {
 	FILE *filein;
@@ -596,108 +569,7 @@ int SetupWorld(void) {
 	fclose(filein);
 	return 0;
 }
-int SetupThing(const unsigned char* mdata, size_t msize, SECTOR* output) {
-	FILE *filein;
-	int numtriangles; // Number of triangles in sector
-	char line[255];   // String to store data in
-	float x = 0;      // 3D coords
-	float y = 0;
-	float z = 0;
-	float u = 0;      // tex coords
-	float v = 0;
-	float nx = 0;
-	float ny = 0;
-	float nz = 0;
 
-	// open file in memory
-	filein = fmemopen((void *)mdata, msize, "rb");
-
-	// read in data
-	readstr(filein, line); // Get single line of data
-	sscanf(line, "NUMPOLYS %d\n", &numtriangles); // Read in number of triangles
-
-	// allocate new triangle objects
-	output->triangle = (TRIANGLE*)malloc(sizeof(TRIANGLE)*numtriangles);
-	output->numtriangles = numtriangles;
-
-	// Step through each tri in sector
-	for (int triloop = 0; triloop < numtriangles; triloop++) {
-		// Step through each vertex in tri
-		for (int vertloop = 0; vertloop < 3; vertloop++) {
-			readstr(filein,line); // Read string
-			if (line[0] == '\r' || line[0] == '\n') { // Ignore blank lines.
-				vertloop--;
-				continue;
-			}
-			if (line[0] == '/') { // Ignore lines with comments.
-				vertloop--;
-				continue;
-			}
-			sscanf(line, "%f %f %f %f %f %f %f %f", &x, &y, &z, &u, &v, &nx, &ny, &nz); // Read in data from string
-			// Store values into respective vertices
-			output->triangle[triloop].vertex[vertloop].x = x;
-			output->triangle[triloop].vertex[vertloop].y = y;
-			output->triangle[triloop].vertex[vertloop].z = z;
-			output->triangle[triloop].vertex[vertloop].u = u;
-			output->triangle[triloop].vertex[vertloop].v = v;
-			output->triangle[triloop].vertex[vertloop].nx = nx;
-			output->triangle[triloop].vertex[vertloop].ny = ny;
-			output->triangle[triloop].vertex[vertloop].nz = nz;
-		}
-}
-	fclose(filein);
-	return 0;
-}
-void DrawSpinnyBoi(Mtx v, GXTexObj texture, SECTOR* object, f32 posX, f32 posY, f32 posZ) {
-	Mtx m, mr, mt, mv;
-	guVector Xaxis, Yaxis;
-	f32 xtrans = -xpos;
-	f32 ztrans = -zpos;
-	f32 ytrans = -walkbias - 0.25f;
-	f32 sceneroty = 360.0f - yrot;
-	GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
-	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
-	GX_LoadTexObj(&texture, GX_TEXMAP0);
-	Xaxis.x = 1.0f;
-	Xaxis.y = 0;
-	Xaxis.z = 0;
-	guMtxIdentity(m);
-	guMtxRotAxisDeg(m, &Xaxis, lookupdown);
-	guMtxConcat(m, v, mv);
-	Yaxis.x = 0;
-	Yaxis.y = 1.0f;
-	Yaxis.z = 0;
-	guMtxIdentity(m);
-	guMtxRotAxisDeg(m, &Yaxis, sceneroty);
-	guMtxConcat(mv, m, mv);
-	guMtxApplyTrans(mv, mt, xtrans, ytrans, ztrans);
-	guMtxApplyTrans(mt, m, posX, posY, posZ);
-	guMtxRotAxisDeg(mr, &Yaxis, objectYRot);
-	guMtxConcat(m, mr, mv);
-	GX_LoadPosMtxImm(mv, GX_PNMTX0);
-
-	// Draw triangles
-	for (int loop_m = 0; loop_m < object->numtriangles; loop_m++) {
-		GX_Begin(GX_TRIANGLES, GX_VTXFMT0, 3);
-		for(int vtx = 0; vtx < 3; vtx++) {
-			GX_Position3f32(
-				object->triangle[loop_m].vertex[vtx].x,
-				object->triangle[loop_m].vertex[vtx].y,
-				object->triangle[loop_m].vertex[vtx].z
-			);
-			GX_Normal3f32(
-				object->triangle[loop_m].vertex[vtx].nx,
-				 object->triangle[loop_m].vertex[vtx].ny,
-				 object->triangle[loop_m].vertex[vtx].nz
-			);
-			GX_TexCoord2f32(
-				object->triangle[loop_m].vertex[vtx].u,
-				-object->triangle[loop_m].vertex[vtx].v
-			);
-		}
-		GX_End();
-	}
-}
 void Draw2D() {
 	Mtx model;
 	Mtx44 ortho;
@@ -733,6 +605,8 @@ void Draw2D() {
 }
 
 void End2D(Mtx44 perspective) {
+	//all of this attempts to restore order to the rendering process after setting stuff to draw in 2D
+	//i have no idea if i remembered to put all the right functions i actually need and its hard enough debugging such an obscure API but it runs on both my emulator and my real wii so its good enough for me
 	GX_InvalidateTexAll();
 	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
 
@@ -757,16 +631,10 @@ void End2D(Mtx44 perspective) {
 	GX_SetNumChans(1);
 
 }
-// Read in each line.
-void readstr(FILE *f, char *string) {
-	do {
-		fgets(string, 255, f);
-	} while ((string[0] == '/') || (string[0] == '\n'));
-	return;
-}
-void textDraw(GXTexObj meowy)
+// draw text at the top left of the screen
+void textDraw(GXTexObj texture)
 {
-	GX_LoadTexObj(&meowy, GX_TEXMAP0);
+	GX_LoadTexObj(&texture, GX_TEXMAP0);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 	GX_Position2s16(0, 50);        // Top-left: x=100, y=100
 	GX_TexCoord2f32(0.0f, 0.0f);
@@ -786,4 +654,15 @@ bool CheckObjectCollision(f32 x, f32 z, f32 x2, f32 z2, f32 radius) {
 	f32 dz = z2 - z;
 	f32 distance = sqrtf(dx*dx + dz*dz);
 	return distance < (radius + PLAYER_RADIUS);
+}
+void resetPlayer() {
+	yrot = 0.0f;
+	xrot = 0.0f;
+	xpos = 0.0f;
+	zpos = 1.8f;
+	guVector cam = {0.0F, 0.0F, 0.0F},
+		up = {0.0F, 1.0F, 0.0F},
+		look = {0.0F, 0.0F, -1.0F};
+	guLookAt(view, &cam, &up, &look);
+
 }
