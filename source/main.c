@@ -632,6 +632,7 @@ void End2D(Mtx44 perspective) {
 
 }
 // draw text at the top left of the screen
+// TODO: use fontsheet and dynamically set size of quad
 void textDraw(GXTexObj texture)
 {
 	GX_LoadTexObj(&texture, GX_TEXMAP0);
