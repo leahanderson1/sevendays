@@ -23,11 +23,11 @@
 #define ROOM_Z 1.8f
 #define PLAYER_RADIUS 0.15f
 /* DATA FILE FORMAT
-Each triangle in our data file is declared as follows:
-
-X1 Y1 Z1 U1 V1 NX1 NY1 NZ1
-X2 Y2 Z2 U2 V2 NX2 NY2 NZ2
-X3 Y3 Z3 U3 V3 NX3 NY3 NZ3 */
+ * Each triangle in our data file is declared as follows:
+ *
+ * X1 Y1 Z1 U1 V1 NX1 NY1 NZ1
+ * X2 Y2 Z2 U2 V2 NX2 NY2 NZ2
+ * X3 Y3 Z3 U3 V3 NX3 NY3 NZ3 */
 
 static void *frameBuffer[2] = { NULL, NULL};
 GXRModeObj *rmode;
@@ -47,9 +47,9 @@ Mtx view;
 f32 zdepth=0.0f; // depth into the screen
 
 static GXColor LightColors[] = {
-		{ 0xFF, 0xFF, 0xFF, 0xFF }, // Light color 1
-		{ 0x80, 0x80, 0x80, 0xFF }, // Ambient 1
-		{ 0x80, 0x80, 0x80, 0xFF }  // Material 1
+	{ 0xFF, 0xFF, 0xFF, 0xFF }, // Light color 1
+	{ 0x80, 0x80, 0x80, 0xFF }, // Ambient 1
+	{ 0x80, 0x80, 0x80, 0xFF }  // Material 1
 };
 
 // A vertex is the basic element of our room.
@@ -90,7 +90,7 @@ TEXT interaction;
 
 //---------------------------------------------------------------------------------
 int main( int argc, char **argv ){
-//---------------------------------------------------------------------------------
+	//---------------------------------------------------------------------------------
 	f32 yscale;
 
 	u32 xfbHeight;
@@ -206,8 +206,8 @@ int main( int argc, char **argv ){
 	// setup our camera at the origin
 	// looking down the -z axis with y up
 	guVector cam = {0.0F, 0.0F, 0.0F},
-			up = {0.0F, 1.0F, 0.0F},
-		  look = {0.0F, 0.0F, -1.0F};
+	up = {0.0F, 1.0F, 0.0F},
+	look = {0.0F, 0.0F, -1.0F};
 	guLookAt(view, &cam, &up, &look);
 
 	// setup our projection matrix
@@ -373,10 +373,6 @@ void DrawScene(Mtx v, GXTexObj texture) {
 	guVector axis;                 // Vector for axis we're rotating on
 
 	SetLight(v, LightColors[0], LightColors[1], LightColors[2], xpos, zpos);
-	// Set up TEV to paint the textures properly.
-
-
-	// Load up the textures (just one this time).
 	GX_LoadTexObj(&texture, GX_TEXMAP0);
 
 	//glRotatef(lookupdown,1.0f,0,0);
@@ -411,36 +407,36 @@ void DrawScene(Mtx v, GXTexObj texture) {
 	// HACK: v tex coord is inverted so textures are rightside up.
 	for (int loop_m = 0; loop_m < numtriangles; loop_m++) {
 		GX_Begin(GX_TRIANGLES,GX_VTXFMT0,3);
-			x_m = sector1.triangle[loop_m].vertex[0].x;
-			y_m = sector1.triangle[loop_m].vertex[0].y;
-			z_m = sector1.triangle[loop_m].vertex[0].z;
-			u_m = sector1.triangle[loop_m].vertex[0].u;
-			v_m = sector1.triangle[loop_m].vertex[0].v;
-			GX_Position3f32(x_m,y_m,z_m);
-			GX_Normal3f32((f32)sector1.triangle[loop_m].vertex[0].nx, (f32)sector1.triangle[loop_m].vertex[0].ny, (f32)sector1.triangle[loop_m].vertex[0].nz);
-			//GX_Color3f32(0.7f,0.7f,0.7f);
-			GX_TexCoord2f32(u_m,-v_m);
+		x_m = sector1.triangle[loop_m].vertex[0].x;
+		y_m = sector1.triangle[loop_m].vertex[0].y;
+		z_m = sector1.triangle[loop_m].vertex[0].z;
+		u_m = sector1.triangle[loop_m].vertex[0].u;
+		v_m = sector1.triangle[loop_m].vertex[0].v;
+		GX_Position3f32(x_m,y_m,z_m);
+		GX_Normal3f32((f32)sector1.triangle[loop_m].vertex[0].nx, (f32)sector1.triangle[loop_m].vertex[0].ny, (f32)sector1.triangle[loop_m].vertex[0].nz);
+		//GX_Color3f32(0.7f,0.7f,0.7f);
+		GX_TexCoord2f32(u_m,-v_m);
 
-			x_m = sector1.triangle[loop_m].vertex[1].x;
-			y_m = sector1.triangle[loop_m].vertex[1].y;
-			z_m = sector1.triangle[loop_m].vertex[1].z;
-			u_m = sector1.triangle[loop_m].vertex[1].u;
-			v_m = sector1.triangle[loop_m].vertex[1].v;
-			GX_Position3f32(x_m,y_m,z_m);
-			GX_Normal3f32((f32)sector1.triangle[loop_m].vertex[1].nx,(f32)sector1.triangle[loop_m].vertex[1].ny,(f32)sector1.triangle[loop_m].vertex[1].nz);
-			//GX_Color3f32(0.7f,0.7f,0.7f);
-			GX_TexCoord2f32(u_m,-v_m);
+		x_m = sector1.triangle[loop_m].vertex[1].x;
+		y_m = sector1.triangle[loop_m].vertex[1].y;
+		z_m = sector1.triangle[loop_m].vertex[1].z;
+		u_m = sector1.triangle[loop_m].vertex[1].u;
+		v_m = sector1.triangle[loop_m].vertex[1].v;
+		GX_Position3f32(x_m,y_m,z_m);
+		GX_Normal3f32((f32)sector1.triangle[loop_m].vertex[1].nx,(f32)sector1.triangle[loop_m].vertex[1].ny,(f32)sector1.triangle[loop_m].vertex[1].nz);
+		//GX_Color3f32(0.7f,0.7f,0.7f);
+		GX_TexCoord2f32(u_m,-v_m);
 
-			x_m = sector1.triangle[loop_m].vertex[2].x;
-			y_m = sector1.triangle[loop_m].vertex[2].y;
-			z_m = sector1.triangle[loop_m].vertex[2].z;
-			u_m = sector1.triangle[loop_m].vertex[2].u;
-			v_m = sector1.triangle[loop_m].vertex[2].v;
-			GX_Position3f32(x_m,y_m,z_m);
-			GX_Normal3f32((f32)sector1.triangle[loop_m].vertex[2].nx, (f32)sector1.triangle[loop_m].vertex[2].ny, (f32)sector1.triangle[loop_m].vertex[2].nz);
-			//GX_Color3f32(0.7f,0.7f,0.7f);
-			GX_TexCoord2f32(u_m,-v_m);
-			GX_End();
+		x_m = sector1.triangle[loop_m].vertex[2].x;
+		y_m = sector1.triangle[loop_m].vertex[2].y;
+		z_m = sector1.triangle[loop_m].vertex[2].z;
+		u_m = sector1.triangle[loop_m].vertex[2].u;
+		v_m = sector1.triangle[loop_m].vertex[2].v;
+		GX_Position3f32(x_m,y_m,z_m);
+		GX_Normal3f32((f32)sector1.triangle[loop_m].vertex[2].nx, (f32)sector1.triangle[loop_m].vertex[2].ny, (f32)sector1.triangle[loop_m].vertex[2].nz);
+		//GX_Color3f32(0.7f,0.7f,0.7f);
+		GX_TexCoord2f32(u_m,-v_m);
+		GX_End();
 	}
 	GX_LoadTexObj(&doorTexture, GX_TEXMAP0);
 	// draw doors in every doorway
@@ -672,8 +668,8 @@ void resetPlayer() {
 	xpos = 0.0f;
 	zpos = 1.8f;
 	guVector cam = {0.0F, 0.0F, 0.0F},
-		up = {0.0F, 1.0F, 0.0F},
-		look = {0.0F, 0.0F, -1.0F};
+	up = {0.0F, 1.0F, 0.0F},
+	look = {0.0F, 0.0F, -1.0F};
 	guLookAt(view, &cam, &up, &look);
 
 }
