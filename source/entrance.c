@@ -53,15 +53,24 @@ int entrance_free() {
 }
 int entrance_interact() {
     if (CheckObjectCollision(xpos, zpos, 0.0f, -1.0f, 0.5f)) {
+        // seal
         interaction = SEVENDAYS;
         return 60;
     } else if (CheckObjectCollision(xpos, zpos, 0.0f, 1.8f, 0.2f)) {
-        interaction = NOTURNINGBACK;
-        entrance_free();
-        resetPlayer();
+        // back door
+        interaction = ENTRANCE;
         return 60;
     } else if (CheckObjectCollision(xpos, zpos, 0.0f, -1.8f, 0.2f)) {
+        // upper door
         interaction = LOCKED;
+        return 60;
+    } else if (CheckObjectCollision(xpos, zpos, 1.8f, 0.0f, 0.2f)) {
+        // right door
+        interaction = LOCKED;
+        return 60;
+    } else if (CheckObjectCollision(xpos, zpos, -1.8f, 0.0f, 0.2f)) {
+        // left door
+        interaction = SEVENDAYS;
         return 60;
     }
     return 0;

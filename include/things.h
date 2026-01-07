@@ -29,7 +29,8 @@ typedef enum {
     NONE,
     NOTURNINGBACK,
     SEVENDAYS,
-    LOCKED
+    LOCKED,
+    ENTRANCE
 } TEXT;
 int SetupThing(const unsigned char* mdata, size_t msize, SECTOR* output);
 void FreeThing(SECTOR thing);

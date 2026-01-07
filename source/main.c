@@ -16,6 +16,7 @@
 #include "door.h"
 #include "doortext_tpl.h"
 #include "locked_tpl.h"
+#include "noescape_tpl.h"
 #include "entrance.h"
 #define DEFAULT_FIFO_SIZE	(256*1024)
 #define ROOM_X 1.8f
@@ -69,6 +70,8 @@ TPLFile noTPL;
 GXTexObj noTexture;
 TPLFile lockedTPL;
 GXTexObj lockedTexture;
+TPLFile entranceTPL;
+GXTexObj entranceTexture;
 int (*level_render)();
 int (*level_init)();
 int (*level_collide)();
@@ -166,6 +169,8 @@ int main( int argc, char **argv ){
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_NRM, GX_NRM_XYZ, GX_F32, 0);
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
+	GX_SetTevOp(GX_TEVSTAGE0,GX_MODULATE);
+	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 
 	// setup texture coordinate generation
 	// args: texcoord slot 0-7, matrix type, source to generate texture coordinates from, matrix to use
@@ -196,6 +201,8 @@ int main( int argc, char **argv ){
 	TPL_OpenTPLFromMemory(&lockedTPL, (void *)locked_tpl, locked_tpl_size);
 	TPL_GetTexture(&lockedTPL, 0, &lockedTexture);
 	TPL_CloseTPLFile(&lockedTPL);
+	TPL_OpenTPLFromMemory(&entranceTPL, (void *)noescape_tpl, noescape_tpl_size);
+	TPL_GetTexture(&entranceTPL, 0, &entranceTexture);
 	// setup our camera at the origin
 	// looking down the -z axis with y up
 	guVector cam = {0.0F, 0.0F, 0.0F},
@@ -304,6 +311,9 @@ int main( int argc, char **argv ){
 				case LOCKED:
 					textDraw(lockedTexture);
 					break;
+				case ENTRANCE:
+					textDraw(entranceTexture);
+					break;
 			}
 			interactTimer--;
 		}
@@ -364,8 +374,7 @@ void DrawScene(Mtx v, GXTexObj texture) {
 
 	SetLight(v, LightColors[0], LightColors[1], LightColors[2], xpos, zpos);
 	// Set up TEV to paint the textures properly.
-	GX_SetTevOp(GX_TEVSTAGE0,GX_MODULATE);
-	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
+
 
 	// Load up the textures (just one this time).
 	GX_LoadTexObj(&texture, GX_TEXMAP0);
@@ -624,7 +633,8 @@ void End2D(Mtx44 perspective) {
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_NRM, GX_NRM_XYZ, GX_F32, 0);
 	GX_SetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
-
+	GX_SetTevOp(GX_TEVSTAGE0,GX_MODULATE);
+	GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
 	GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX3x4, GX_TG_TEX0, GX_IDENTITY);
 	GX_SetNumTexGens(1);
 
