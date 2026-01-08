@@ -442,44 +442,44 @@ void DrawScene(Mtx v, GXTexObj texture) {
 	// draw doors in every doorway
 	GX_Begin(GX_QUADS, GX_VTXFMT0,4);
 	GX_Position3f32(-0.5f, 0.0f, 3.0f);
-	GX_Normal3f32(-0.5f, 0.0f, 3.0f);
+	GX_Normal3f32(0.0f, 0.0f, 1.0f);
 	GX_TexCoord2f32(0.0f, 0.0f);//top left
 	GX_Position3f32(0.5f, 0.0f, 3.0f);
-	GX_Normal3f32(0.5f, 0.0f, 3.0f);
+	GX_Normal3f32(0.0f, 0.0f, 1.0f);
 	GX_TexCoord2f32(1.0f, 0.0f);//top right
 	GX_Position3f32(0.5f, 1.0f, 3.0f);
-	GX_Normal3f32(0.5f, 1.0f, 3.0f);
+	GX_Normal3f32(0.0f, 0.0f, 1.0f);
 	GX_TexCoord2f32(1.0f, 1.0f);//bottom right
 	GX_Position3f32(-0.5f, 1.0f, 3.0f);
-	GX_Normal3f32(-0.5f, 1.0f, 3.0f);
+	GX_Normal3f32(0.0f, 0.0f, 1.0f);
 	GX_TexCoord2f32(0.0f, 1.0f);//bottom left
 	GX_End();
 	GX_Begin(GX_QUADS, GX_VTXFMT0,4);
 	GX_Position3f32(-0.5f, 0.0f, -3.0f);
-	GX_Normal3f32(-0.5f, 0.0f, -3.0f);
+	GX_Normal3f32(0.0f, 0.0f, -1.0f);
 	GX_TexCoord2f32(0.0f, 0.0f);//top left
 	GX_Position3f32(0.5f, 0.0f, -3.0f);
-	GX_Normal3f32(0.5f, 0.0f, -3.0f);
+	GX_Normal3f32(0.0f, 0.0f, -1.0f);
 	GX_TexCoord2f32(1.0f, 0.0f);//top right
 	GX_Position3f32(0.5f, 1.0f, -3.0f);
-	GX_Normal3f32(0.5f, 1.0f, -3.0f);
+	GX_Normal3f32(0.0f, 0.0f, -1.0f);
 	GX_TexCoord2f32(1.0f, 1.0f);//bottom right
 	GX_Position3f32(-0.5f, 1.0f, -3.0f);
-	GX_Normal3f32(-0.5f, 1.0f, -3.0f);
+	GX_Normal3f32(0.0f, 0.0f, -1.0f);
 	GX_TexCoord2f32(0.0f, 1.0f);//bottom left
 	GX_End();
 	GX_Begin(GX_QUADS, GX_VTXFMT0,4);
 	GX_Position3f32(3.0f, 0.0f, -0.5f);
-	GX_Normal3f32(3.0f, 0.0f, -0.5f);
+	GX_Normal3f32(-1.0f, 0.0f, 0.0f);
 	GX_TexCoord2f32(0.0f, 0.0f);//top left
 	GX_Position3f32(3.0f, 0.0f, 0.5f);
-	GX_Normal3f32(3.0f, 0.0f, 0.5f);
+	GX_Normal3f32(-1.0f, 0.0f, 0.0f);
 	GX_TexCoord2f32(1.0f, 0.0f);//top right
 	GX_Position3f32(3.0f, 1.0f, 0.5f);
-	GX_Normal3f32(3.0f, 1.0f, 0.5f);
+	GX_Normal3f32(-1.0f, 0.0f, 0.0f);
 	GX_TexCoord2f32(1.0f, 1.0f);//bottom right
 	GX_Position3f32(3.0f, 1.0f, -0.5f);
-	GX_Normal3f32(3.0f, 1.0f, -0.5f);
+	GX_Normal3f32(-1.0f, 0.0f, 0.0f);
 	GX_TexCoord2f32(0.0f, 1.0f);//bottom left
 	GX_End();
 	GX_Begin(GX_QUADS, GX_VTXFMT0,4);
@@ -487,13 +487,13 @@ void DrawScene(Mtx v, GXTexObj texture) {
 	GX_Normal3f32(-3.0f, 0.0f, 0.5f);
 	GX_TexCoord2f32(0.0f, 0.0f);//top left
 	GX_Position3f32(-3.0f, 0.0f, -0.5f);
-	GX_Normal3f32(-3.0f, 0.0f, -0.5f);
+	GX_Normal3f32(1.0f, 0.0f, 0.0f);
 	GX_TexCoord2f32(1.0f, 0.0f);//top right
 	GX_Position3f32(-3.0f, 1.0f, -0.5f);
-	GX_Normal3f32(-3.0f, 1.0f, -0.5f);
+	GX_Normal3f32(1.0f, 0.0f, 0.0f);
 	GX_TexCoord2f32(1.0f, 1.0f);//bottom right
 	GX_Position3f32(-3.0f, 1.0f, 0.5f);
-	GX_Normal3f32(-3.0f, 1.0f, 0.5f);
+	GX_Normal3f32(1.0f, 0.0f, 0.0f);
 	GX_TexCoord2f32(0.0f, 1.0f);//bottom left
 	GX_End();
 
@@ -505,10 +505,9 @@ void SetLight(Mtx view, GXColor litcol, GXColor ambcol, GXColor matcol, f32 play
 	guVector lpos;
 	GXLightObj lobj;
 
-	f32 lightDistance = 1.0f;  // Distance in front of the player
-	lpos.x = playerX + sin(DegToRad(yrot)) * lightDistance;
+	lpos.x = playerX; 
 	lpos.y = 0.5f;
-	lpos.z = playerZ + cos(DegToRad(yrot)) * lightDistance;
+	lpos.z = playerZ;
 
 	GX_InitLightPos(&lobj, lpos.x, lpos.y, lpos.z);
 	GX_InitLightColor(&lobj, litcol);

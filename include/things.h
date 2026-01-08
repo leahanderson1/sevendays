@@ -53,4 +53,6 @@ extern f32 lookupdown;
 extern f32 walkbias;
 extern f32 xpos, zpos;
 extern TEXT interaction;
+// this is so levels can access the wall texture in the case they need to block off exits from the base room
+extern GXTexObj texture; 
 #endif

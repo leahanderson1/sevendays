@@ -16,9 +16,37 @@ static int dummy_render() {
 }
 
 SECTOR sealObj;
-extern GXTexObj sealTexture;
 
 int entrance() {
+    // HACK: we use 8 vertices so i can split the texture in half and then switch the position of the two halves
+    // also we use 0'd out normals because world.txt doesn't have normals
+    GX_LoadTexObj(&texture, GX_TEXMAP0);
+    GX_Begin(GX_QUADS, GX_VTXFMT0, 8);
+    GX_Position3f32(2.0f, 0.0f, -0.5f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.5f, 1.0f);
+    GX_Position3f32(2.0f, 0.0f, 0.0f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(1.0f, 1.0f);
+    GX_Position3f32(2.0f, 1.0f, 0.0f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(1.0f, 0.0f);
+    GX_Position3f32(2.0f, 1.0f, -0.5f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.5f, 0.0f);
+    GX_Position3f32(2.0f, 0.0f, 0.0f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.0f, 1.0f);
+    GX_Position3f32(2.0f, 0.0f, 0.5f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.5f, 1.0f);
+    GX_Position3f32(2.0f, 1.0f, 0.5f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.5f, 0.0f);
+    GX_Position3f32(2.0f, 1.0f, 0.0f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.0f, 0.0f);
+    GX_End();
     objectYRot += 0.5f;
     if(objectYRot >= 360.0f) objectYRot -= 360.0f;
     DrawThing(view, sealTexture, &sealObj, 0.0f, 0.1f, -1.0f, objectYRot);
@@ -64,10 +92,10 @@ int entrance_interact() {
         // upper door
         interaction = LOCKED;
         return 60;
-    } else if (CheckObjectCollision(xpos, zpos, 1.8f, 0.0f, 0.2f)) {
+   /* } else if (CheckObjectCollision(xpos, zpos, 1.8f, 0.0f, 0.2f)) {
         // right door
         interaction = LOCKED;
-        return 60;
+        return 60; */
     } else if (CheckObjectCollision(xpos, zpos, -1.8f, 0.0f, 0.2f)) {
         // left door
         interaction = SEVENDAYS;
