@@ -1,6 +1,9 @@
 #ifndef THINGS_H
 #define THINGS_H
 #include <gccore.h>
+
+#include "dungeon.h"
+
 typedef struct tagVERTEX // vertex coords - 3d and texture
 {
     f32 x, y, z; // 3d coords
