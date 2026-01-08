@@ -470,30 +470,30 @@ void DrawScene(Mtx v, GXTexObj texture) {
 	GX_End();
 	GX_Begin(GX_QUADS, GX_VTXFMT0,4);
 	GX_Position3f32(3.0f, 0.0f, -0.5f);
-	GX_Normal3f32(-1.0f, 0.0f, 0.0f);
+	GX_Normal3f32(1.0f, 0.0f, 0.0f);
 	GX_TexCoord2f32(0.0f, 0.0f);//top left
 	GX_Position3f32(3.0f, 0.0f, 0.5f);
-	GX_Normal3f32(-1.0f, 0.0f, 0.0f);
+	GX_Normal3f32(1.0f, 0.0f, 0.0f);
 	GX_TexCoord2f32(1.0f, 0.0f);//top right
 	GX_Position3f32(3.0f, 1.0f, 0.5f);
-	GX_Normal3f32(-1.0f, 0.0f, 0.0f);
+	GX_Normal3f32(1.0f, 0.0f, 0.0f);
 	GX_TexCoord2f32(1.0f, 1.0f);//bottom right
 	GX_Position3f32(3.0f, 1.0f, -0.5f);
-	GX_Normal3f32(-1.0f, 0.0f, 0.0f);
+	GX_Normal3f32(1.0f, 0.0f, 0.0f);
 	GX_TexCoord2f32(0.0f, 1.0f);//bottom left
 	GX_End();
 	GX_Begin(GX_QUADS, GX_VTXFMT0,4);
 	GX_Position3f32(-3.0f, 0.0f, 0.5f);
-	GX_Normal3f32(-3.0f, 0.0f, 0.5f);
+	GX_Normal3f32(-1.0f, 0.0f, 0.5f);
 	GX_TexCoord2f32(0.0f, 0.0f);//top left
 	GX_Position3f32(-3.0f, 0.0f, -0.5f);
-	GX_Normal3f32(1.0f, 0.0f, 0.0f);
+	GX_Normal3f32(-1.0f, 0.0f, 0.0f);
 	GX_TexCoord2f32(1.0f, 0.0f);//top right
 	GX_Position3f32(-3.0f, 1.0f, -0.5f);
-	GX_Normal3f32(1.0f, 0.0f, 0.0f);
+	GX_Normal3f32(-1.0f, 0.0f, 0.0f);
 	GX_TexCoord2f32(1.0f, 1.0f);//bottom right
 	GX_Position3f32(-3.0f, 1.0f, 0.5f);
-	GX_Normal3f32(1.0f, 0.0f, 0.0f);
+	GX_Normal3f32(-1.0f, 0.0f, 0.0f);
 	GX_TexCoord2f32(0.0f, 1.0f);//bottom left
 	GX_End();
 
