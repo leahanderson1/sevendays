@@ -1,8 +1,11 @@
 #include <gccore.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "things.h"
+
+#define PLAYER_RADIUS 0.15f
 
 void readstr(FILE *f, char *string) {
     do {
@@ -115,4 +118,10 @@ void DrawThing(Mtx v, GXTexObj texture, SECTOR* object, f32 posX, f32 posY, f32 
 void FreeThing(SECTOR thing) {
     free(thing.triangle);
     thing.triangle = NULL;
+}
+bool CheckObjectCollision(f32 x, f32 z, f32 x2, f32 z2, f32 radius) {
+    f32 dx = x2 - x;
+    f32 dz = z2 - z;
+    f32 distance = sqrtf(dx*dx + dz*dz);
+    return distance < (radius + PLAYER_RADIUS);
 }

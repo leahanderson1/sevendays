@@ -21,7 +21,6 @@
 #define DEFAULT_FIFO_SIZE	(256*1024)
 #define ROOM_X 1.8f
 #define ROOM_Z 1.8f
-#define PLAYER_RADIUS 0.15f
 /* DATA FILE FORMAT
  * Each triangle in our data file is declared as follows:
  *
@@ -203,6 +202,7 @@ int main( int argc, char **argv ){
 	TPL_CloseTPLFile(&lockedTPL);
 	TPL_OpenTPLFromMemory(&entranceTPL, (void *)noescape_tpl, noescape_tpl_size);
 	TPL_GetTexture(&entranceTPL, 0, &entranceTexture);
+	TPL_CloseTPLFile(&entranceTPL);
 	// setup our camera at the origin
 	// looking down the -z axis with y up
 	guVector cam = {0.0F, 0.0F, 0.0F},
@@ -215,9 +215,9 @@ int main( int argc, char **argv ){
 	// and aspect ratio based on the display resolution
 	guPerspective(perspective, 45, (f32)w/h, 0.1F, 300.0F);
 	GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
-
 	// get the initial room ready to render
 	SetupWorld();
+	// call whatever function level_init is referring to
 	(*level_init)();
 	while(1) {
 		PAD_ScanPads();
@@ -656,12 +656,7 @@ void textDraw(GXTexObj texture)
 	GX_TexCoord2f32(0.0f, 1.0f);
 	GX_End();
 }
-bool CheckObjectCollision(f32 x, f32 z, f32 x2, f32 z2, f32 radius) {
-	f32 dx = x2 - x;
-	f32 dz = z2 - z;
-	f32 distance = sqrtf(dx*dx + dz*dz);
-	return distance < (radius + PLAYER_RADIUS);
-}
+
 void resetPlayer() {
 	yrot = 0.0f;
 	xrot = 0.0f;
