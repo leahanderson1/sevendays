@@ -4,6 +4,9 @@
 #include <math.h>
 
 #include "things.h"
+#include "dungeon.h"
+
+Room level;
 
 #define PLAYER_RADIUS 0.15f
 

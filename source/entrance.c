@@ -47,7 +47,7 @@ int entrance() {
     GX_Normal3f32(0.0f, 0.0f, 0.0f);
     GX_TexCoord2f32(0.0f, 0.0f);
     GX_End();
-    objectYRot += 0.5f;
+    objectYRot += deltaTime * 20;
     if(objectYRot >= 360.0f) objectYRot -= 360.0f;
     DrawThing(view, sealTexture, &sealObj, 0.0f, 0.1f, -1.0f, objectYRot);
     return 0;

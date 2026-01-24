@@ -6,6 +6,8 @@
 #include <math.h>
 #include <gccore.h>
 #include <wiiuse/wpad.h>
+#include <ogc/lwp_watchdog.h>
+
 #include "things.h"
 #include "mud_tpl.h"
 #include "mud.h"
@@ -27,7 +29,8 @@
  * X1 Y1 Z1 U1 V1 NX1 NY1 NZ1
  * X2 Y2 Z2 U2 V2 NX2 NY2 NZ2
  * X3 Y3 Z3 U3 V3 NX3 NY3 NZ3 */
-
+static u64 lastTime = 0;
+f32 deltaTime = 0.0f;
 static void *frameBuffer[2] = { NULL, NULL};
 GXRModeObj *rmode;
 
@@ -51,8 +54,7 @@ static GXColor LightColors[] = {
 	{ 0x80, 0x80, 0x80, 0xFF }  // Material 1
 };
 
-// A vertex is the basic element of our room.
-
+	// A vertex is the basic element of our room.
 
 SECTOR sector1;
 GXTexObj texture;
@@ -122,7 +124,6 @@ int main( int argc, char **argv ){
 	VIDEO_SetBlack(false);
 	VIDEO_Flush();
 	VIDEO_WaitVSync();
-	if(rmode->viTVMode&VI_NON_INTERLACE) VIDEO_WaitVSync();
 
 	// setup the fifo...
 	void *gp_fifo = NULL;
@@ -220,6 +221,12 @@ int main( int argc, char **argv ){
 	// call whatever function level_init is referring to
 	(*level_init)();
 	while(1) {
+		VIDEO_WaitVSync();
+		u64 currentTime = gettime();
+		deltaTime = (f32)diff_usec(lastTime, currentTime) / 1000000.0f;
+		lastTime = currentTime;
+		if(deltaTime > 0.1f) deltaTime = 0.1f;
+		f32 moveSpeed = 0.05f * (deltaTime * 60.0f);
 		PAD_ScanPads();
 		WPAD_ScanPads();
 		int pad = PAD_ButtonsDown(0);
@@ -256,14 +263,14 @@ int main( int argc, char **argv ){
 		if(tpad < -50) {
 			moveStrafe = -1.0f;
 		}
-
-		if(moveForward != 0.0f && moveStrafe != 0.0f) {
+// why the fuck is this here and what is it doing
+// i removed it and it still works fin
+	/*	if(moveForward != 0.0f && moveStrafe != 0.0f) {
 			f32 length = sqrtf(moveForward * moveForward + moveStrafe * moveStrafe);
 			moveForward /= length;
 			moveStrafe /= length;
 		}
-
-		f32 moveSpeed = 0.05f;
+*/
 		if(moveForward != 0.0f || moveStrafe != 0.0f) {
 			f32 proposedX = xpos - (float)sin(DegToRad(yrot)) * moveForward * moveSpeed;
 			f32 proposedZ = zpos - (float)cos(DegToRad(yrot)) * moveForward * moveSpeed;
@@ -335,21 +342,14 @@ int main( int argc, char **argv ){
 		GX_TexCoord2f32(0.0f, 1.0f);
 		GX_End();
 		End2D(perspective);
-		GX_LoadProjectionMtx(perspective, GX_PERSPECTIVE);
-		GX_SetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
-		GX_SetColorUpdate(GX_TRUE);
 		GX_CopyDisp(frameBuffer[fb],GX_TRUE);
-
 		// do this stuff after drawing
 		GX_DrawDone();
-
 		fb ^= 1; // flip framebuffer
-
 		VIDEO_SetNextFramebuffer(frameBuffer[fb]);
 
 		VIDEO_Flush();
 
-		VIDEO_WaitVSync();
 
 
 	}
@@ -634,6 +634,8 @@ void End2D(Mtx44 perspective) {
 	GX_SetNumTexGens(1);
 
 	GX_SetNumChans(1);
+        GX_SetColorUpdate(GX_TRUE);
+
 
 }
 // draw text at the top left of the screen

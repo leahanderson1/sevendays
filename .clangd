@@ -1,0 +1,2 @@
+CompileFlags: # Tweak the parse settings, example directory given to show format
+  Add: [-I/opt/devkitpro/libogc2/wii/include, -I/home/leah/Documents/sevendays/include, -I/home/leah/Documents/sevendays/build ]            # e.g `-I/usr/include/SDL2`  suggested from @Palmkeep
