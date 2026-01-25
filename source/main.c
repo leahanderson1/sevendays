@@ -9,6 +9,7 @@
 #include <ogc/lwp_watchdog.h>
 
 #include "things.h"
+#include "2d.h"
 #include "mud_tpl.h"
 #include "mud.h"
 #include "world_txt.h"
@@ -31,7 +32,8 @@
  * X3 Y3 Z3 U3 V3 NX3 NY3 NZ3 */
 static u64 lastTime = 0;
 // delta time low and high limits
-#define LOW_LIMIT 0.0167f
+// TEST: boredom has led me to see what happens if it has no lower limit
+//#define LOW_LIMIT 0.0167f
 #define HIGH_LIMIT 0.1f
 f32 deltaTime = 0.0f;
 static void *frameBuffer[2] = { NULL, NULL};
@@ -228,8 +230,8 @@ int main( int argc, char **argv ){
 		lastTime = currentTime;
 		if(deltaTime > HIGH_LIMIT) 
 			deltaTime = HIGH_LIMIT;
-		else if(deltaTime < LOW_LIMIT)
-				deltaTime = LOW_LIMIT;
+/*		else if(deltaTime < LOW_LIMIT)
+				deltaTime = LOW_LIMIT; */
 		f32 moveSpeed = 0.05f * (deltaTime * 60.0f);
 		PAD_ScanPads();
 		WPAD_ScanPads();
@@ -245,7 +247,8 @@ int main( int argc, char **argv ){
 		s8 tpad;
 		tpad = PAD_SubStickX(0);
 		if ((tpad < -8) || (tpad > 8)) yrot -= (float)tpad / 50.f;
-
+		tpad = PAD_SubStickY(0);
+		if ((tpad < -8) || (tpad > 8)) xrot += (float)tpad / 50.f;
 		// Get movement input
 		f32 moveForward = 0.0f;
 		f32 moveStrafe = 0.0f;
@@ -371,6 +374,7 @@ void DrawScene(Mtx v, GXTexObj texture) {
 	f32 ztrans = -zpos;            // Used for player translation on the z axis
 	f32 ytrans = -walkbias-0.25f;  // Used for bouncing motion up and down
 	f32 sceneroty = 360.0f - yrot; // 360 degree angle for player direction
+	f32 scenerotx = 360.0f - xrot;
 	int numtriangles;              // Integer to hold the number of triangles
 	Mtx m; // Model matrix
 	Mtx mt; // Model rotated matrix
@@ -385,7 +389,7 @@ void DrawScene(Mtx v, GXTexObj texture) {
 	axis.y = 0;
 	axis.z = 0;
 	guMtxIdentity(m);
-	guMtxRotAxisDeg(m, &axis, lookupdown);
+	guMtxRotAxisDeg(m, &axis, scenerotx);
 	guMtxConcat(m,v,mv);
 
 	//glrotatef(sceneroty,0,1.0f,0);
@@ -647,20 +651,7 @@ void End2D(Mtx44 perspective) {
 // TODO: use fontsheet and dynamically set size of quad
 void textDraw(GXTexObj texture)
 {
-	GX_LoadTexObj(&texture, GX_TEXMAP0);
-	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
-	GX_Position2s16(0, 50);        // Top-left: x=100, y=100
-	GX_TexCoord2f32(0.0f, 0.0f);
-
-	GX_Position2s16(256, 50);        // Top-right: x=100+256, y=100
-	GX_TexCoord2f32(1.0f, 0.0f);
-
-	GX_Position2s16(256, 82);        // Bottom-right: x=100+256, y=100+64
-	GX_TexCoord2f32(1.0f, 1.0f);
-
-	GX_Position2s16(0, 82);        // Bottom-left: x=100, y=100+64
-	GX_TexCoord2f32(0.0f, 1.0f);
-	GX_End();
+	DrawTex(0, 50, 256, 32, texture);
 }
 
 void resetPlayer() {

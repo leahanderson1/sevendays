@@ -61,7 +61,7 @@ int entrance_load() {
     return 0;
 }
 int entrance_collision() {
-    if(CheckObjectCollision(xpos, zpos, 0.0f, -1.0f, 0.2f)) {
+    if(CheckObjectCollision(xpos, zpos, 0.0f, -1.0f, 0.3f)) {
         f32 pushBack = 0.05f;
         f32 dx = 0.0f - xpos;
         f32 dz = -1.0f - zpos;

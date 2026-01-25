@@ -74,6 +74,7 @@ void DrawThing(Mtx v, GXTexObj texture, SECTOR* object, f32 posX, f32 posY, f32 
     f32 xtrans = -xpos;
     f32 ztrans = -zpos;
     f32 ytrans = -walkbias - 0.25f;
+    f32 scenerotx = 360.0f - xrot;
     f32 sceneroty = 360.0f - yrot;
     GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
     GX_SetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD0, GX_TEXMAP0, GX_COLOR0A0);
@@ -82,7 +83,7 @@ void DrawThing(Mtx v, GXTexObj texture, SECTOR* object, f32 posX, f32 posY, f32 
     Xaxis.y = 0;
     Xaxis.z = 0;
     guMtxIdentity(m);
-    guMtxRotAxisDeg(m, &Xaxis, lookupdown);
+    guMtxRotAxisDeg(m, &Xaxis, scenerotx);
     guMtxConcat(m, v, mv);
     Yaxis.x = 0;
     Yaxis.y = 1.0f;
