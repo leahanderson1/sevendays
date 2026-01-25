@@ -47,7 +47,8 @@ int entrance() {
     GX_Normal3f32(0.0f, 0.0f, 0.0f);
     GX_TexCoord2f32(0.0f, 0.0f);
     GX_End();
-    objectYRot += deltaTime * 20;
+    // quick explanation of deltatime: essentially when i multiply it by deltatime thats how much i want it to move in one frame
+    objectYRot += 20.0f * deltaTime;
     if(objectYRot >= 360.0f) objectYRot -= 360.0f;
     DrawThing(view, sealTexture, &sealObj, 0.0f, 0.1f, -1.0f, objectYRot);
     return 0;

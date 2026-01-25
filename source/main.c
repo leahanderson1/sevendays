@@ -30,6 +30,9 @@
  * X2 Y2 Z2 U2 V2 NX2 NY2 NZ2
  * X3 Y3 Z3 U3 V3 NX3 NY3 NZ3 */
 static u64 lastTime = 0;
+// delta time low and high limits
+#define LOW_LIMIT 0.0167f
+#define HIGH_LIMIT 0.1f
 f32 deltaTime = 0.0f;
 static void *frameBuffer[2] = { NULL, NULL};
 GXRModeObj *rmode;
@@ -80,8 +83,6 @@ int (*level_interact)();
 int (*level_free)();
 
 void DrawScene(Mtx v, GXTexObj texture);
-void Draw2D();
-void End2D(Mtx44);
 void SetLight(Mtx view, GXColor litcol, GXColor ambcol, GXColor matcol, f32 playerX, f32 playerZ);
 int SetupWorld(void);
 void textDraw(GXTexObj);
@@ -225,12 +226,16 @@ int main( int argc, char **argv ){
 		u64 currentTime = gettime();
 		deltaTime = (f32)diff_usec(lastTime, currentTime) / 1000000.0f;
 		lastTime = currentTime;
-		if(deltaTime > 0.1f) deltaTime = 0.1f;
+		if(deltaTime > HIGH_LIMIT) 
+			deltaTime = HIGH_LIMIT;
+		else if(deltaTime < LOW_LIMIT)
+				deltaTime = LOW_LIMIT;
 		f32 moveSpeed = 0.05f * (deltaTime * 60.0f);
 		PAD_ScanPads();
 		WPAD_ScanPads();
 		int pad = PAD_ButtonsDown(0);
-		if (WPAD_ButtonsDown(0) & WPAD_BUTTON_HOME) exit(0);
+		int wpad = WPAD_ButtonsDown(0);
+		if (wpad & WPAD_BUTTON_HOME) exit(0);
 		if(pad & PAD_BUTTON_START) exit(0);
 
 		if(pad & PAD_BUTTON_A) {
@@ -264,7 +269,7 @@ int main( int argc, char **argv ){
 			moveStrafe = -1.0f;
 		}
 // why the fuck is this here and what is it doing
-// i removed it and it still works fin
+// i removed it and it still works fine
 	/*	if(moveForward != 0.0f && moveStrafe != 0.0f) {
 			f32 length = sqrtf(moveForward * moveForward + moveStrafe * moveStrafe);
 			moveForward /= length;

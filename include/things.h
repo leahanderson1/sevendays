@@ -1,7 +1,7 @@
 #ifndef THINGS_H
 #define THINGS_H
 #include <gccore.h>
-
+#include <stdio.h>
 #include "dungeon.h"
 
 typedef struct tagVERTEX // vertex coords - 3d and texture
@@ -41,6 +41,8 @@ bool CheckObjectCollision(f32 x, f32 z, f32, f32 x2, f32 z2);
 void readstr(FILE *f, char *string);
 void resetPlayer();
 void DrawThing(Mtx v, GXTexObj texture, SECTOR* object, f32 posX, f32 posY, f32 posZ, f32 rotY);
+void Draw2D();
+void End2D(Mtx44);
 extern int (*level_render)();
 extern int (*level_init)();
 extern int (*level_collide)();
