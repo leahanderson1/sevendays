@@ -258,7 +258,11 @@ int main( int argc, char **argv ){
 		tpad = PAD_SubStickX(0);
 		if ((tpad < -8) || (tpad > 8)) yrot -= (float)tpad / 50.f;
 		tpad = PAD_SubStickY(0);
-		if ((tpad < -8) || (tpad > 8)) xrot += (float)tpad / 50.f;
+		if ((tpad < -8) || ((tpad > 8))) xrot += (float)tpad / 50.f;
+		if (xrot > 90.0f) 
+			xrot = 90.0f;
+		else if (xrot < -90.0f) 
+			xrot = -90.0f;
 		// Get movement input
 		tpad = PAD_StickY(0);
 		if(tpad > 50) {

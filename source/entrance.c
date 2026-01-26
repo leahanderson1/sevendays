@@ -18,8 +18,7 @@ static int dummy_render() {
 SECTOR sealObj;
 
 int entrance() {
-//    room_3exits();
-    room_2exits_corner();
+    room_3exits();
     // quick explanation of deltatime: essentially when i multiply it by deltatime thats how much i want it to move in one frame
     objectYRot += 20.0f * deltaTime;
     if(objectYRot >= 360.0f) objectYRot -= 360.0f;
