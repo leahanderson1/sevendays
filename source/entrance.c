@@ -8,7 +8,7 @@
 #include "seal_txt.h"
 #include "seal_tpl.h"
 #include "entrance.h"
-
+#include "room.h"
 
 f32 objectYRot = 0.0f;
 static int dummy_render() {
@@ -18,35 +18,8 @@ static int dummy_render() {
 SECTOR sealObj;
 
 int entrance() {
-    // HACK: we use 8 vertices so i can split the texture in half and then switch the position of the two halves
-    // also we use 0'd out normals because world.txt doesn't have normals
-    GX_LoadTexObj(&texture, GX_TEXMAP0);
-    GX_Begin(GX_QUADS, GX_VTXFMT0, 8);
-    GX_Position3f32(2.0f, 0.0f, -0.5f);
-    GX_Normal3f32(0.0f, 0.0f, 0.0f);
-    GX_TexCoord2f32(0.5f, 1.0f);
-    GX_Position3f32(2.0f, 0.0f, 0.0f);
-    GX_Normal3f32(0.0f, 0.0f, 0.0f);
-    GX_TexCoord2f32(1.0f, 1.0f);
-    GX_Position3f32(2.0f, 1.0f, 0.0f);
-    GX_Normal3f32(0.0f, 0.0f, 0.0f);
-    GX_TexCoord2f32(1.0f, 0.0f);
-    GX_Position3f32(2.0f, 1.0f, -0.5f);
-    GX_Normal3f32(0.0f, 0.0f, 0.0f);
-    GX_TexCoord2f32(0.5f, 0.0f);
-    GX_Position3f32(2.0f, 0.0f, 0.0f);
-    GX_Normal3f32(0.0f, 0.0f, 0.0f);
-    GX_TexCoord2f32(0.0f, 1.0f);
-    GX_Position3f32(2.0f, 0.0f, 0.5f);
-    GX_Normal3f32(0.0f, 0.0f, 0.0f);
-    GX_TexCoord2f32(0.5f, 1.0f);
-    GX_Position3f32(2.0f, 1.0f, 0.5f);
-    GX_Normal3f32(0.0f, 0.0f, 0.0f);
-    GX_TexCoord2f32(0.5f, 0.0f);
-    GX_Position3f32(2.0f, 1.0f, 0.0f);
-    GX_Normal3f32(0.0f, 0.0f, 0.0f);
-    GX_TexCoord2f32(0.0f, 0.0f);
-    GX_End();
+//    room_3exits();
+    room_2exits_corner();
     // quick explanation of deltatime: essentially when i multiply it by deltatime thats how much i want it to move in one frame
     objectYRot += 20.0f * deltaTime;
     if(objectYRot >= 360.0f) objectYRot -= 360.0f;

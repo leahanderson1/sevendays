@@ -49,7 +49,7 @@ int SetupThing(const unsigned char* mdata, size_t msize, SECTOR* output) {
                 vertloop--;
                 continue;
             }
-            if (line[0] == '/') { // Ignore lines with comments.
+            if (line[0] == '/') { // Ignore lines that start with /, we don't need to check if it has a second / because even if it doesn't then it would be an invalid line so might as well just ignore it always
                 vertloop--;
                 continue;
             }

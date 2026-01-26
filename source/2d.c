@@ -1,6 +1,6 @@
 #include "2d.h"
 
-void DrawTex(f32 x, f32 y, unsigned int width, unsigned int height, GXTexObj texture) {
+void DrawTex(unsigned int x, unsigned int y, unsigned int width, unsigned int height, GXTexObj texture) {
 	GX_LoadTexObj(&texture, GX_TEXMAP0);
 	GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
 	GX_Position2s16(x, y);

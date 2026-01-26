@@ -8,6 +8,7 @@
 #include <wiiuse/wpad.h>
 #include <ogc/lwp_watchdog.h>
 
+#include "ogc/tpl.h"
 #include "things.h"
 #include "2d.h"
 #include "mud_tpl.h"
@@ -32,8 +33,7 @@
  * X3 Y3 Z3 U3 V3 NX3 NY3 NZ3 */
 static u64 lastTime = 0;
 // delta time low and high limits
-// TEST: boredom has led me to see what happens if it has no lower limit
-//#define LOW_LIMIT 0.0167f
+#define LOW_LIMIT 0.0167f
 #define HIGH_LIMIT 0.1f
 f32 deltaTime = 0.0f;
 static void *frameBuffer[2] = { NULL, NULL};
@@ -60,7 +60,7 @@ static GXColor LightColors[] = {
 };
 
 	// A vertex is the basic element of our room.
-
+f32 w, h;
 SECTOR sector1;
 GXTexObj texture;
 TPLFile mudTPL;
@@ -87,10 +87,10 @@ int (*level_free)();
 void DrawScene(Mtx v, GXTexObj texture);
 void SetLight(Mtx view, GXColor litcol, GXColor ambcol, GXColor matcol, f32 playerX, f32 playerZ);
 int SetupWorld(void);
-void textDraw(GXTexObj);
+static inline void textDraw(GXTexObj);
 bool CheckObjectCollision(f32 x, f32 z, f32, f32 x2, f32 z2);
 TEXT interaction;
-
+bool titlething = true;
 
 //---------------------------------------------------------------------------------
 int main( int argc, char **argv ){
@@ -179,13 +179,16 @@ int main( int argc, char **argv ){
 	// args: texcoord slot 0-7, matrix type, source to generate texture coordinates from, matrix to use
 	GX_SetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX3x4, GX_TG_TEX0, GX_IDENTITY);
 
-	f32 w = rmode->viWidth;
-	f32 h = rmode->viHeight;
+	w = rmode->viWidth;
+	h = rmode->viHeight;
 	guLightPerspective(mv,45, (f32)w/h, 1.05F, 1.0F, 0.0F, 0.0F);
 	guMtxTrans(mr, 0.0F, 0.0F, -1.0F);
 	guMtxConcat(mv, mr, mv);
+	void title_init(void);
+	void title(Mtx44);
 	GX_LoadTexMtxImm(mv, GX_TEXMTX0, GX_MTX3x4);
 	GX_InvalidateTexAll();
+	title_init();
 	TPL_OpenTPLFromMemory(&mudTPL, (void *)mud_tpl,mud_tpl_size);
 	TPL_GetTexture(&mudTPL,mud,&texture);
 	TPL_CloseTPLFile(&mudTPL);
@@ -207,6 +210,10 @@ int main( int argc, char **argv ){
 	TPL_OpenTPLFromMemory(&entranceTPL, (void *)noescape_tpl, noescape_tpl_size);
 	TPL_GetTexture(&entranceTPL, 0, &entranceTexture);
 	TPL_CloseTPLFile(&entranceTPL);
+	GX_InitTexObjFilterMode(&sevenTexture, GX_NEAR, GX_NEAR);
+	GX_InitTexObjFilterMode(&noTexture, GX_NEAR, GX_NEAR);
+	GX_InitTexObjFilterMode(&lockedTexture, GX_NEAR, GX_NEAR);
+	GX_InitTexObjFilterMode(&entranceTexture, GX_NEAR, GX_NEAR);
 	// setup our camera at the origin
 	// looking down the -z axis with y up
 	guVector cam = {0.0F, 0.0F, 0.0F},
@@ -225,21 +232,24 @@ int main( int argc, char **argv ){
 	(*level_init)();
 	while(1) {
 		VIDEO_WaitVSync();
+		f32 moveForward = 0.0f;
+		f32 moveStrafe = 0.0f;
 		u64 currentTime = gettime();
 		deltaTime = (f32)diff_usec(lastTime, currentTime) / 1000000.0f;
 		lastTime = currentTime;
 		if(deltaTime > HIGH_LIMIT) 
 			deltaTime = HIGH_LIMIT;
-/*		else if(deltaTime < LOW_LIMIT)
-				deltaTime = LOW_LIMIT; */
+		else if(deltaTime < LOW_LIMIT)
+				deltaTime = LOW_LIMIT;
 		f32 moveSpeed = 0.05f * (deltaTime * 60.0f);
+		if(!titlething) {
 		PAD_ScanPads();
 		WPAD_ScanPads();
+		if(!titlething) {
 		int pad = PAD_ButtonsDown(0);
 		int wpad = WPAD_ButtonsDown(0);
 		if (wpad & WPAD_BUTTON_HOME) exit(0);
 		if(pad & PAD_BUTTON_START) exit(0);
-
 		if(pad & PAD_BUTTON_A) {
 			// as well as set the interact timer, the interact function also sets what kind of interaction to use
 			interactTimer = (*level_interact)();
@@ -250,9 +260,6 @@ int main( int argc, char **argv ){
 		tpad = PAD_SubStickY(0);
 		if ((tpad < -8) || (tpad > 8)) xrot += (float)tpad / 50.f;
 		// Get movement input
-		f32 moveForward = 0.0f;
-		f32 moveStrafe = 0.0f;
-
 		tpad = PAD_StickY(0);
 		if(tpad > 50) {
 			moveForward = 1.0f; // Move on the x-plane based on player direction
@@ -267,9 +274,10 @@ int main( int argc, char **argv ){
 		tpad = PAD_StickX(0);
 		if(tpad > 50) {
 			moveStrafe = 1.0f;
-		}
+		} 
 		if(tpad < -50) {
 			moveStrafe = -1.0f;
+		}
 		}
 // why the fuck is this here and what is it doing
 // i removed it and it still works fine
@@ -277,8 +285,7 @@ int main( int argc, char **argv ){
 			f32 length = sqrtf(moveForward * moveForward + moveStrafe * moveStrafe);
 			moveForward /= length;
 			moveStrafe /= length;
-		}
-*/
+		} */
 		if(moveForward != 0.0f || moveStrafe != 0.0f) {
 			f32 proposedX = xpos - (float)sin(DegToRad(yrot)) * moveForward * moveSpeed;
 			f32 proposedZ = zpos - (float)cos(DegToRad(yrot)) * moveForward * moveSpeed;
@@ -297,10 +304,11 @@ int main( int argc, char **argv ){
 			} else {
 				walkbiasangle += 10;
 			}
-			walkbias = (float)sin(DegToRad(walkbiasangle))/20.0f;
+			walkbias = (float)sin(DegToRad(walkbiasangle))/25.0f;
+		}
 		}
 		(*level_collide)();
-
+		
 		// do this before drawing
 		GX_SetViewport(0,0,rmode->fbWidth,rmode->efbHeight,0,1);
 		GX_SetNumTexGens(1);
@@ -334,21 +342,8 @@ int main( int argc, char **argv ){
 		}
 		if (interactTimer <= 0 && interaction != NONE)
 			interaction = NONE;
-		GX_LoadTexObj(&lighterTexture, GX_TEXMAP0);
-		GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
-		// draw lighter
-		GX_Position2s16(300, 250);
-		GX_TexCoord2f32(0.0f, 0.0f);
-
-		GX_Position2s16(630, 250);
-		GX_TexCoord2f32(1.0f, 0.0f);
-
-		GX_Position2s16(630, 497);
-		GX_TexCoord2f32(1.0f, 1.0f);
-
-		GX_Position2s16(300, 497);
-		GX_TexCoord2f32(0.0f, 1.0f);
-		GX_End();
+		DrawTex(300, 250, 330, 247, lighterTexture);
+		title(perspective);
 		End2D(perspective);
 		GX_CopyDisp(frameBuffer[fb],GX_TRUE);
 		// do this stuff after drawing
@@ -649,8 +644,7 @@ void End2D(Mtx44 perspective) {
 }
 // draw text at the top left of the screen
 // TODO: use fontsheet and dynamically set size of quad
-void textDraw(GXTexObj texture)
-{
+static inline void textDraw(GXTexObj texture) {
 	DrawTex(0, 50, 256, 32, texture);
 }
 
