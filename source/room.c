@@ -93,6 +93,7 @@ int room_2exits_straight() {
     GX_Position3f32(-2.0f, 1.0f, -0.5f);
     GX_Normal3f32(0.0f, 0.0f, 0.0f);
     GX_TexCoord2f32(0.5f, 0.0f);
+
     GX_Position3f32(-2.0f, 0.0f, 0.0f);
     GX_Normal3f32(0.0f, 0.0f, 0.0f);
     GX_TexCoord2f32(0.0f, 1.0f);
@@ -110,19 +111,63 @@ int room_2exits_straight() {
 }
 int room_2exits_corner() {
     room_3exits();
-    GX_Begin(GX_QUADS, GX_VTXFMT0,4);
-    GX_Position3f32(-0.5f, 0.0f, 2.0f);
+    GX_Begin(GX_QUADS, GX_VTXFMT0,8);
+    GX_Position3f32(-0.5f, 0.0f, -2.0f);
     GX_Normal3f32(0.0f, 0.0f, 0.0f);
-    GX_TexCoord2f32(0.0f, 1.0f);//top left
-    GX_Position3f32(0.5f, 0.0f, 2.0f);
+    GX_TexCoord2f32(0.5f, 1.0f);//top left
+    GX_Position3f32(0.0f, 0.0f, -2.0f);
     GX_Normal3f32(0.0f, 0.0f, 0.0f);
     GX_TexCoord2f32(1.0f, 1.0f);//top right
-    GX_Position3f32(0.5f, 1.0f, 2.0f);
+    GX_Position3f32(0.0f, 1.0f, -2.0f);
     GX_Normal3f32(0.0f, 0.0f, 0.0f);
     GX_TexCoord2f32(1.0f, 0.0f);//bottom right
-    GX_Position3f32(-0.5f, 1.0f, 2.0f);
+    GX_Position3f32(-0.5f, 1.0f, -2.0f);
     GX_Normal3f32(0.0f, 0.0f, 0.0f);
-    GX_TexCoord2f32(0.0f, 0.0f);//bottom left
+    GX_TexCoord2f32(0.5f, 0.0f);//bottom left
+    
+    GX_Position3f32(0.0f, 0.0f, -2.0f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.0f, 1.0f);
+    GX_Position3f32(0.5f, 0.0f, -2.0f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.5f, 1.0f);
+    GX_Position3f32(0.5f, 1.0f, -2.0f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.5f, 0.0f);
+    GX_Position3f32(0.0f, 1.0f, -2.0f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.0f, 0.0f);
+    GX_End();
+    return 0;
+}
+int room_1exit() {
+    room_2exits_corner();
+    GX_Begin(GX_QUADS, GX_VTXFMT0, 8);
+    GX_Position3f32(-2.0f, 0.0f, -0.5f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.5f, 1.0f);
+    GX_Position3f32(-2.0f, 0.0f, 0.0f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(1.0f, 1.0f);
+    GX_Position3f32(-2.0f, 1.0f, 0.0f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(1.0f, 0.0f);
+    GX_Position3f32(-2.0f, 1.0f, -0.5f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.5f, 0.0f);
+
+    GX_Position3f32(-2.0f, 0.0f, 0.0f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.0f, 1.0f);
+    GX_Position3f32(-2.0f, 0.0f, 0.5f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.5f, 1.0f);
+    GX_Position3f32(-2.0f, 1.0f, 0.5f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.5f, 0.0f);
+    GX_Position3f32(-2.0f, 1.0f, 0.0f);
+    GX_Normal3f32(0.0f, 0.0f, 0.0f);
+    GX_TexCoord2f32(0.0f, 0.0f);
     GX_End();
     return 0;
 }
