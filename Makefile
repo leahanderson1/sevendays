@@ -7,6 +7,9 @@
 ifeq ($(strip $(DEVKITPPC)),)
 $(error "Please set DEVKITPPC in your environment. export DEVKITPPC=<path to>devkitPPC")
 endif
+ifeq (, $(shell which wimgt))
+$(error "No wimgt in $(PATH), consider installing Wiimms SZS Toolset")
+endif
 
 #include $(DEVKITPRO)/libogc2/wii_rules
 include $(DEVKITPPC)/wii_rules
@@ -27,7 +30,7 @@ INCLUDES	:=	include
 # options for code generation
 #---------------------------------------------------------------------------------
 
-CFLAGS	= -O2 -Wall $(MACHDEP) $(INCLUDE)
+CFLAGS	= -g -O2 -Wall $(MACHDEP) $(INCLUDE)
 CXXFLAGS	=	$(CFLAGS)
 
 LDFLAGS	= $(MACHDEP) -Wl,-Map,$(notdir $@).map
@@ -67,8 +70,9 @@ sFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.S)))
 BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 SCFFILES	:=	$(foreach dir,$(TEXTURES),$(notdir $(wildcard $(dir)/*.scf)))
+PNGFILES	:=	$(foreach dir,$(TEXTURES),$(notdir $(wildcard $(dir)/*.png)))
 TPLFILES	:=	$(SCFFILES:.scf=.tpl)
-
+TPLFILES +=      $(PNGFILES:.png=.tpl)
 #---------------------------------------------------------------------------------
 # use CXX for linking C++ projects, CC for standard C
 #---------------------------------------------------------------------------------
@@ -121,7 +125,7 @@ else
 # main targets
 #---------------------------------------------------------------------------------
 $(OUTPUT).dol: $(OUTPUT).elf
-$(OUTPUT).elf: $(OFILES)
+$(OUTPUT).elf: $(PNGFILES) $(OFILES)
 
 $(OFILES_SOURCES) : $(HFILES)
 
@@ -137,8 +141,11 @@ $(OFILES_SOURCES) : $(HFILES)
 	@echo $(notdir $<)
 	@$(bin2o)
 
-
 -include $(DEPSDIR)/*.d
+
+%.tpl : %.png
+	$(SILENTMSG) converting $< ...
+	$(SILENTCMD)wimgt enc -x TPL $< -d $@
 
 #---------------------------------------------------------------------------------
 endif

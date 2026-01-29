@@ -1,7 +1,5 @@
 #include <gccore.h>
 #include <wiiuse/wpad.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
 
 #include "things.h"
@@ -18,7 +16,7 @@ static int dummy_render() {
 SECTOR sealObj;
 
 int entrance() {
-    room_3exits();
+    room_2exits_corner();
     //room_1exit();
     // quick explanation of deltatime: essentially when i multiply it by deltatime thats how much i want it to move in one frame
     objectYRot += 20.0f * deltaTime;
@@ -62,11 +60,11 @@ int entrance_interact() {
         // back door
         interaction = ENTRANCE;
         return 60;
-    } else if (CheckObjectCollision(xpos, zpos, 0.0f, -1.8f, 0.2f)) {
+   /* } else if (CheckObjectCollision(xpos, zpos, 0.0f, -1.8f, 0.2f)) {
         // upper door
         interaction = LOCKED;
         return 60;
-   /* } else if (CheckObjectCollision(xpos, zpos, 1.8f, 0.0f, 0.2f)) {
+    } else if (CheckObjectCollision(xpos, zpos, 1.8f, 0.0f, 0.2f)) {
         // right door
         interaction = LOCKED;
         return 60; */
