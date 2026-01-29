@@ -29,8 +29,8 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
-
-CFLAGS	= -g -O2 -Wall $(MACHDEP) $(INCLUDE)
+DEFINE  = -DWII
+CFLAGS	= -O2 -Wall $(MACHDEP) $(INCLUDE) $(DEFINE)
 CXXFLAGS	=	$(CFLAGS)
 
 LDFLAGS	= $(MACHDEP) -Wl,-Map,$(notdir $@).map
@@ -144,7 +144,6 @@ $(OFILES_SOURCES) : $(HFILES)
 -include $(DEPSDIR)/*.d
 
 %.tpl : %.png
-	$(SILENTMSG) converting $< ...
 	$(SILENTCMD)wimgt enc -x TPL $< -d $@
 
 #---------------------------------------------------------------------------------

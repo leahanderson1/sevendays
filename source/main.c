@@ -250,7 +250,7 @@ int main( int argc, char **argv ){
 		int wpad = WPAD_ButtonsDown(0);
 		if (wpad & WPAD_BUTTON_HOME) exit(0);
 		if(pad & PAD_BUTTON_START) exit(0);
-		if(pad & PAD_BUTTON_A) {
+		if(pad & PAD_BUTTON_A || wpad & WPAD_BUTTON_A) {
 			// as well as set the interact timer, the interact function also sets what kind of interaction to use
 			interactTimer = (*level_interact)();
 		}
