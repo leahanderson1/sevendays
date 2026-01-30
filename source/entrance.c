@@ -14,12 +14,16 @@ static int dummy_render() {
 }
 
 SECTOR sealObj;
-
+static bool sealed = false;
 int entrance() {
     room_2exits_corner();
     //room_1exit();
     // quick explanation of deltatime: essentially when i multiply it by deltatime thats how much i want it to move in one frame
-    objectYRot += 20.0f * deltaTime;
+    if(!sealed) {
+    	objectYRot += 40.0f * deltaTime;
+    } else {
+	objectYRot = atan2f(xpos, zpos + 1.0f) * (180.0f / M_PI) + 180.0f;
+    }
     if(objectYRot >= 360.0f) objectYRot -= 360.0f;
     DrawThing(view, sealTexture, &sealObj, 0.0f, 0.1f, -1.0f, objectYRot);
     return 0;
@@ -52,9 +56,10 @@ int entrance_free() {
     return 0;
 }
 int entrance_interact() {
-    if (CheckObjectCollision(xpos, zpos, 0.0f, -1.0f, 0.5f)) {
+    if (CheckObjectCollision(xpos, zpos, 0.0f, -1.0f, 0.5f) && !sealed) {
         // seal
-        interaction = SEVENDAYS;
+	sealed = true;
+	interaction = SEVENDAYS;
         return 60;
     } else if (CheckObjectCollision(xpos, zpos, 0.0f, 1.8f, 0.2f)) {
         // back door
