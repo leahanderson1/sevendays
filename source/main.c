@@ -8,6 +8,7 @@
 #include <wiiuse/wpad.h>
 #include <ogc/lwp_watchdog.h>
 
+#include "ogc/gx.h"
 #include "ogc/tpl.h"
 #include "things.h"
 #include "2d.h"
@@ -22,6 +23,7 @@
 #include "locked_tpl.h"
 #include "noescape_tpl.h"
 #include "entrance.h"
+#include "rabbittex_tpl.h"
 #define DEFAULT_FIFO_SIZE	(256*1024)
 #define ROOM_X 1.8f
 #define ROOM_Z 1.8f
@@ -78,6 +80,8 @@ TPLFile lockedTPL;
 GXTexObj lockedTexture;
 TPLFile entranceTPL;
 GXTexObj entranceTexture;
+static TPLFile rabbitTPL;
+GXTexObj rabbitTex;
 int (*level_render)();
 int (*level_init)();
 int (*level_collide)();
@@ -210,6 +214,9 @@ int main( int argc, char **argv ){
 	TPL_OpenTPLFromMemory(&entranceTPL, (void *)noescape_tpl, noescape_tpl_size);
 	TPL_GetTexture(&entranceTPL, 0, &entranceTexture);
 	TPL_CloseTPLFile(&entranceTPL);
+	TPL_OpenTPLFromMemory(&rabbitTPL, (void *)rabbittex_tpl, rabbittex_tpl_size);
+	TPL_GetTexture(&rabbitTPL, 0, &rabbitTex);
+	TPL_CloseTPLFile(&rabbitTPL);
 	GX_InitTexObjFilterMode(&sevenTexture, GX_NEAR, GX_NEAR);
 	GX_InitTexObjFilterMode(&noTexture, GX_NEAR, GX_NEAR);
 	GX_InitTexObjFilterMode(&lockedTexture, GX_NEAR, GX_NEAR);

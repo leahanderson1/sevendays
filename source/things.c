@@ -123,6 +123,7 @@ void FreeThing(SECTOR thing) {
     free(thing.triangle);
     thing.triangle = NULL;
 }
+// TODO: get rid of this fucked up radius collision system and replace it with proper AABB
 bool CheckObjectCollision(f32 x, f32 z, f32 x2, f32 z2, f32 radius) {
     f32 dx = x2 - x;
     f32 dz = z2 - z;

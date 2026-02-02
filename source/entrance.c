@@ -17,7 +17,6 @@ SECTOR sealObj;
 static bool sealed = false;
 int entrance() {
     room_2exits_corner();
-    //room_1exit();
     // quick explanation of deltatime: essentially when i multiply it by deltatime thats how much i want it to move in one frame
     if(!sealed) {
     	objectYRot += 40.0f * deltaTime;

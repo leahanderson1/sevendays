@@ -182,8 +182,8 @@ void DrawAnimatedThing(Mtx v, AnimatedThing *model, f32 posX, f32 posY, f32 posZ
         	guMtxConcat(bone->worldTransform, model->armature.bindPoseInverse[i], skinMtx);
         
         	guMtxConcat(mv, skinMtx, finalMtx);
-        
-        	GX_LoadPosMtxImm(finalMtx, GX_PNMTX0 + i);
+        	// damm you preprocessor defines	
+        	GX_LoadPosMtxImm(finalMtx, GX_PNMTX0 + (i * 3));
     	}
 	if (model->numtexs > 0 && model->objs != NULL)
         	GX_LoadTexObj(&model->objs[0], GX_TEXMAP0);

@@ -135,6 +135,7 @@ extern f32 xpos, zpos;
 extern TEXT interaction;
 extern f32 deltaTime;
 extern f32 w, h;
+extern GXTexObj rabbitTex;
 extern bool titlething;
 // this is so levels can access the wall texture in the case they need to block off exits from the base room
 extern GXTexObj texture;
