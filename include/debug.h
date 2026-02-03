@@ -4,4 +4,5 @@
 
 int debug_init();
 int debug_render();
+int debug_free();
 #endif

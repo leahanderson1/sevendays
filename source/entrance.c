@@ -7,6 +7,7 @@
 #include "seal_tpl.h"
 #include "entrance.h"
 #include "room.h"
+#include "debug.h"
 
 f32 objectYRot = 0.0f;
 static int dummy_render() {
@@ -49,9 +50,11 @@ int entrance_collision() {
 }
 int entrance_free() {
     FreeThing(sealObj);
-    level_render = &dummy_render;
+    debug_init();
+    level_render = &debug_render;
     level_interact = &dummy_render;
     level_collide = &dummy_render;
+    resetPlayer();
     return 0;
 }
 int entrance_interact() {
@@ -75,6 +78,7 @@ int entrance_interact() {
     } else if (CheckObjectCollision(xpos, zpos, -1.8f, 0.0f, 0.2f)) {
         // left door
         interaction = SEVENDAYS;
+	entrance_free();
         return 60;
     }
     return 0;
