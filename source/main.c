@@ -221,6 +221,7 @@ int main( int argc, char **argv ){
 	GX_InitTexObjFilterMode(&noTexture, GX_NEAR, GX_NEAR);
 	GX_InitTexObjFilterMode(&lockedTexture, GX_NEAR, GX_NEAR);
 	GX_InitTexObjFilterMode(&entranceTexture, GX_NEAR, GX_NEAR);
+	GX_InitTexObjFilterMode(&rabbitTex, GX_NEAR, GX_NEAR);
 	// setup our camera at the origin
 	// looking down the -z axis with y up
 	guVector cam = {0.0F, 0.0F, 0.0F},
